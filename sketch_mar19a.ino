@@ -56,7 +56,7 @@ void start_motor_relative(int current, int desired) {
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   pinMode(A_PIN, INPUT_PULLUP);
   pinMode(B_PIN, INPUT_PULLUP);
@@ -133,7 +133,7 @@ void loop() {
     if (!ASwitch && !BSwitch) {
       Serial.print(" | Current Mode: 1");
       last_known_mode = 1;
-      if (!mode_1 || desired_mode == 0) {
+      if (desired_mode == 1 || desired_mode == 0) {
         stop_motor();
       } else {
         start_motor_relative(1, desired_mode);
@@ -142,7 +142,7 @@ void loop() {
     } else if (!BSwitch && !CSwitch) {
       Serial.print(" | Current Mode: 2");
       last_known_mode = 2;
-      if (!mode_2) {
+      if (desired_mode == 2) {
         stop_motor();
       } else {
         start_motor_relative(2, desired_mode);
@@ -151,7 +151,7 @@ void loop() {
     } else if (!CSwitch && !DSwitch) {
       Serial.print(" | Current Mode: 3");
       last_known_mode = 3;
-      if (!mode_3) {
+      if (desired_mode == 3) {
         stop_motor();
       } else {
         start_motor_relative(3, desired_mode);
@@ -160,7 +160,7 @@ void loop() {
     } else if (!DSwitch && !ESwitch) {
       Serial.print(" | Current Mode: 4");
       last_known_mode = 4;
-      if (!mode_4) {
+      if (desired_mode == 4) {
         stop_motor();
       } else {
         start_motor_relative(4, desired_mode);
@@ -169,7 +169,7 @@ void loop() {
     } else if (!ESwitch && !FSwitch) {
       Serial.print(" | Current Mode: 5");
       last_known_mode = 5;
-      if (!mode_5) {
+      if (desired_mode == 5) {
         stop_motor();
       } else {
         start_motor_relative(5, desired_mode);
