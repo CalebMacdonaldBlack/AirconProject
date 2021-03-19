@@ -1,3 +1,10 @@
+    #include <LiquidCrystal.h>
+
+    // initialize the library by associating any needed LCD interface pin
+    // with the arduino pin number it is connected to
+    const int rs = 33, en = 31, d4 = 23, d5 = 25, d6 = 27, d7 = 29;
+    LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+    
     int desired_state = 0;
 
     int A_PIN = 22;
@@ -18,9 +25,21 @@
 
     int last_known_mode = 1;
 
-    int desired_mode = 0;
+    int desired_mode = 1;
 
     int motor_direction = 0;
+
+// constants won't change. They're used here to set pin numbers:
+const int buttonPin = 7;    // the number of the pushbutton pin
+
+// Variables will change:
+int buttonState;             // the current reading from the input pin
+int lastButtonState = LOW;   // the previous reading from the input pin
+
+// the following variables are unsigned longs because the time, measured in
+// milliseconds, will quickly become a bigger number than can be stored in an int.
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
     
 void stop_motor() {
@@ -56,7 +75,7 @@ void start_motor_relative(int current, int desired) {
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   pinMode(A_PIN, INPUT_PULLUP);
   pinMode(B_PIN, INPUT_PULLUP);
@@ -74,11 +93,74 @@ void setup() {
   pinMode(MOTOR_FORWARD_PIN, OUTPUT); // Forward
   pinMode(MOTOR_BACKWARD_PIN, OUTPUT); // Backward
 
+  pinMode(buttonPin, INPUT_PULLUP);
+
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0 );
+  lcd.print("Face             ");
+
 }
 
 
 void loop() {
   // put your main code here, to run repeatedly:
+
+
+  int buttonPinReading = !digitalRead(buttonPin);
+
+  // If the switch changed, due to noise or pressing:
+  if (buttonPinReading != lastButtonState) {
+    // reset the debouncing timer
+    lastDebounceTime = millis();
+  }
+
+   if ((millis() - lastDebounceTime) > debounceDelay) {
+    // whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state:
+
+    // if the button state has changed:
+    if (buttonPinReading != buttonState) {
+      buttonState = buttonPinReading;
+
+      // only toggle the LED if the new button state is HIGH
+      if (buttonState == HIGH) {
+        Serial.println("PRESS");
+
+        if (desired_mode == 5){
+          desired_mode = 1;  
+        } else {
+          desired_mode = desired_mode + 1;  
+        }
+
+        lcd.setCursor(0, 0 );
+        switch (desired_mode) {
+          case 1:
+            // statements
+            lcd.print("Face             ");
+            break;
+          case 2:
+            // statements
+            lcd.print("Face & Feet      ");
+            break;
+          case 3:
+            // statements
+            lcd.print("Feet             ");
+            break;
+          case 4:
+            // statements
+            lcd.print("Demist & Feet    ");
+            break;
+          case 5:
+            // statements
+            lcd.print("Demist           ");
+            break;
+        }
+      }
+    }
+  }
+
+    // save the reading. Next time through the loop, it'll be the lastButtonState:
+     lastButtonState = buttonPinReading;
 
     int ASwitch = digitalRead(A_PIN);
     int BSwitch = digitalRead(B_PIN);
@@ -119,16 +201,16 @@ void loop() {
 
     Serial.print("Desired Mode: ");
     Serial.print(desired_mode);
-    Serial.print(" | Last Known Mode: ");
-    Serial.print(last_known_mode);
-    Serial.print(" | Motor Direction: ");
-    if (motor_direction == 0) {
-      Serial.print("Stopped");
-    } else if (motor_direction == 1) {
-      Serial.print("Forward (CounterClockwise)");      
-    } else if (motor_direction == -1) {
-      Serial.print("Backward (Clockwise)");         
-    }
+//    Serial.print(" | Last Known Mode: ");
+//    Serial.print(last_known_mode);
+//    Serial.print(" | Motor Direction: ");
+//    if (motor_direction == 0) {
+//      Serial.print("Stopped");
+//    } else if (motor_direction == 1) {
+//      Serial.print("Forward (CounterClockwise)");      
+//    } else if (motor_direction == -1) {
+//      Serial.print("Backward (Clockwise)");         
+//    }
 
     if (!ASwitch && !BSwitch) {
       Serial.print(" | Current Mode: 1");
